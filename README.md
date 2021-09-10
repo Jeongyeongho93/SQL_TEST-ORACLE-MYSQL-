@@ -58,6 +58,7 @@ ORDER BY animal_id ASC
 
 
 
+
 Requirement explanation
 Find the dog name that has contain a character with 'el'
 
@@ -74,6 +75,7 @@ FROM animal_ins
 WHERE REGEXP_LIKE(name,'el|eL|El|EL') 
 AND animal_type='Dog'
 ORDER BY name
+
 
 
 
@@ -99,8 +101,46 @@ ORDER BY animal_id
 
 
 
+Requirement explanation
+Find the animals that taken adoption yet from ins and outs DB 
+
+-Oracle
+1.
+SELECT animal_id, name FROM (SELECT animal_outs.animal_id, animal_outs.name 
+                             FROM animal_ins JOIN animal_outs
+                             ON animal_ins.animal_id = animal_outs.animal_id
+                             ORDER BY animal_outs.datetime - animal_ins.datetime DESC)
+WHERE ROWNUM <= 2
+
+2.
+SELECT animal_id , name FROM (
+SELECT i.animal_id, i.name , round((o.datetime - i.datetime)) difference
+FROM animal_ins i, animal_outs o 
+WHERE i.animal_id = o.animal_id
+ORDER BY difference DECS
+)
+WHERE ROWNUM <= 2
+
+-MySQL
+SELECT animal_outs.animal_id, animal_outs.name 
+FROM animal_outs RIGHT JOIN animal_ins
+ON animal_outs.animal_id = animal_ins.animal_id
+WHERE animal_outs.animal_id IS NOT NULL
+ORDER BY DATEDIFF(animal_outs.datetime, animal_ins.datetime) DESC
+LIMIT 2
 
 
 
 
 
+Requirement explanation
+Write the query that the specific data should truck a time format in DATETIME
+
+-Oracle
+SELECT animal_id, name, TO_CHAR(datetime, 'YYYY-MM-DD') AS 날짜
+FROM animal_ins
+ORDER BY animal_id
+
+-MySQL
+SELECT animal_id, name, DATE_FORMAT(datetime, '%Y-%m-%d') AS 날짜
+FROM animal_ins
